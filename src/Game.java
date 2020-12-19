@@ -67,18 +67,18 @@ public class Game implements Runnable {
     }
 
     private void tick() {
-        if (KeyManager.up_pressed) r1.moveBy(0, -5);
-        if (KeyManager.dn_pressed) r1.moveBy(0, 5);
-        if (KeyManager.lt_pressed) r1.moveBy(-5, 0);
-        if (KeyManager.rt_pressed) r1.moveBy(5, 0);
+//        if (KeyManager.up_pressed) r1.moveBy(0, -5);
+//        if (KeyManager.dn_pressed) r1.moveBy(0, 5);
+//        if (KeyManager.lt_pressed) r1.moveBy(-5, 0);
+//        if (KeyManager.rt_pressed) r1.moveBy(5, 0);
 
-//        if (KeyManager.up_pressed) tank1.moveForwardBy(10);
-//        if (KeyManager.dn_pressed) tank1.moveBy(0, 5);
-//        if (KeyManager.lt_pressed) tank1.rotateBy(-5);
-//        if (KeyManager.rt_pressed) tank1.rotateBy(5);
+        if (KeyManager.up_pressed) tank1.moveForwardBy(10);
+        if (KeyManager.dn_pressed) tank1.moveBy(0, 5);
+        if (KeyManager.lt_pressed) tank1.rotateBy(-5);
+        if (KeyManager.rt_pressed) tank1.rotateBy(5);
 
-        tank2.moveBy(5,0);
-        tank2.rotateBy(5);
+//        tank2.moveBy(5,0);
+//        tank2.rotateBy(5);
     }
 
     private void render() {
@@ -93,12 +93,13 @@ public class Game implements Runnable {
 //        if(r1.contains(MouseManager.mouseX, MouseManager.mouseY)) g.setColor(Color.RED);
 //        else g.setColor(Color.BLACK);
 
-        if(r1.overlaps(r2)) g.setColor(Color.RED);
-        else g.setColor(Color.BLACK);
+//        if(r1.overlaps(r2)) g.setColor(Color.RED);
+//        else g.setColor(Color.BLACK);
         r1.draw(g);
         r2.draw(g);
 
-        g.setColor(Color.BLACK);
+        if (tank1.overlaps(tank2)) g.setColor(Color.RED);
+        else g.setColor(Color.BLACK);
         tank1.draw(g);
         tank2.draw(g);
 

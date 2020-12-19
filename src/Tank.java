@@ -4,6 +4,7 @@ public class Tank {
     private int x, y, A;
     double[] cos = Lookup.genCos();
     double[] sin = Lookup.genSin();
+    private Rect AABB;
 
     public static int[][] x_structure = {
             {-40, -40,  40,  40},
@@ -32,11 +33,19 @@ public class Tank {
         this.x = x;
         this.y = y;
         this.A = A;
+
+        AABB = new Rect(x-40, y-40, 80, 80);
+    }
+
+    public boolean overlaps(Tank tank){
+        return AABB.overlaps(tank.AABB);
     }
 
     public void moveBy(int dx, int dy){
         x += dx;
         y += dy;
+
+        AABB.moveBy(dx, dy);
     }
 
     public void moveForwardBy(int d){
@@ -66,5 +75,7 @@ public class Tank {
             }
             g.drawPolygon(x_points,y_points,x_structure[polygon].length);
         }
+
+        AABB.draw(g);
     }
 }
