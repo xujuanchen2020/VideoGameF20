@@ -59,8 +59,6 @@ public abstract class GameApplet implements KeyListener, MouseListener, MouseMot
     public static final int COLON      = KeyEvent.VK_COLON;
     public static final int QUOTE      = KeyEvent.VK_QUOTE;
 
-    public boolean running = false;
-
     public abstract void tick();
 
     public abstract void render();
