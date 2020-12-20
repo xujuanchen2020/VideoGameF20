@@ -92,8 +92,8 @@ public class Game extends GameApplet implements Runnable {
 
 //        if (tank1.overlaps(tank2)) g.setColor(Color.RED);
 //        else g.setColor(Color.BLACK);
-//        tank1.draw(g);
-//        tank2.draw(g);
+        tank1.draw(g);
+        tank2.draw(g);
 
         if (c1.overlaps(c2)) g.setColor(Color.RED);
         else g.setColor(Color.BLACK);
