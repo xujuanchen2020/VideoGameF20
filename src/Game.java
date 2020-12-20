@@ -1,7 +1,7 @@
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 
-public class Game implements Runnable {
+public class Game extends GameApplet implements Runnable {
     private Thread thread;
     private Display display;
 
@@ -16,6 +16,9 @@ public class Game implements Runnable {
     Tank tank1 = new Tank(150,150, 90);
     Tank tank2 = new Tank(150, 350, 90);
 
+    Circle c1 = new Circle(100, 100, 50, 0);
+    Circle c2 = new Circle(200, 200, 50, 0);
+
     public Game(String title, int width, int height){
         this.title = title;
         this.width = width;
@@ -24,15 +27,11 @@ public class Game implements Runnable {
 
     public void init(){
         display = new Display(title, width, height);
-        MouseManager mouseManager = new MouseManager();
-        KeyManager keyManager = new KeyManager();
-
-        display.getjFrame().addKeyListener(keyManager);
-        display.getjFrame().addMouseListener(mouseManager);
-        display.getjFrame().addMouseMotionListener(mouseManager);
-        display.getCanvas().addMouseListener(mouseManager);
-        display.getCanvas().addMouseMotionListener(mouseManager);
-
+        display.getjFrame().addKeyListener(this);
+        display.getjFrame().addMouseListener(this);
+        display.getjFrame().addMouseMotionListener(this);
+        display.getCanvas().addMouseListener(this);
+        display.getCanvas().addMouseMotionListener(this);
     }
 
     @Override
@@ -66,22 +65,16 @@ public class Game implements Runnable {
         stop();
     }
 
-    private void tick() {
-//        if (KeyManager.up_pressed) r1.moveBy(0, -5);
-//        if (KeyManager.dn_pressed) r1.moveBy(0, 5);
-//        if (KeyManager.lt_pressed) r1.moveBy(-5, 0);
-//        if (KeyManager.rt_pressed) r1.moveBy(5, 0);
-
-        if (KeyManager.up_pressed) tank1.moveForwardBy(10);
-        if (KeyManager.dn_pressed) tank1.moveBy(0, 5);
-        if (KeyManager.lt_pressed) tank1.rotateBy(-5);
-        if (KeyManager.rt_pressed) tank1.rotateBy(5);
-
-//        tank2.moveBy(5,0);
-//        tank2.rotateBy(5);
+    @Override
+    public void tick() {
+        if(pressing[UP])  c1.goForward(6);
+        if(pressing[DN])  c1.goBackward(3);
+        if(pressing[LT])  c1.turnLeft(3);
+        if(pressing[RT])  c1.turnRight(3);
     }
 
-    private void render() {
+    @Override
+    public void render() {
         BufferStrategy bs = display.getCanvas().getBufferStrategy();
         if (bs == null){
             display.getCanvas().createBufferStrategy(3);
@@ -90,18 +83,22 @@ public class Game implements Runnable {
         Graphics g = bs.getDrawGraphics();
         g.clearRect(0,0, width, height);
 
-//        if(r1.contains(MouseManager.mouseX, MouseManager.mouseY)) g.setColor(Color.RED);
-//        else g.setColor(Color.BLACK);
-
+        if(r1.contains(mouseX, mouseY)) g.setColor(Color.RED);
+        else g.setColor(Color.BLACK);
 //        if(r1.overlaps(r2)) g.setColor(Color.RED);
 //        else g.setColor(Color.BLACK);
         r1.draw(g);
         r2.draw(g);
 
-        if (tank1.overlaps(tank2)) g.setColor(Color.RED);
+//        if (tank1.overlaps(tank2)) g.setColor(Color.RED);
+//        else g.setColor(Color.BLACK);
+//        tank1.draw(g);
+//        tank2.draw(g);
+
+        if (c1.overlaps(c2)) g.setColor(Color.RED);
         else g.setColor(Color.BLACK);
-        tank1.draw(g);
-        tank2.draw(g);
+        c1.draw(g);
+        c2.draw(g);
 
         bs.show();
         g.dispose();

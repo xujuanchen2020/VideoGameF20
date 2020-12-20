@@ -34,7 +34,7 @@ public class Tank {
         this.y = y;
         this.A = A;
 
-        AABB = new Rect(x-40, y-40, 80, 80);
+        AABB = new Rect(x-40, y-40, 80, 80); // Rect( x, y,w, h)
     }
 
     public boolean overlaps(Tank tank){
