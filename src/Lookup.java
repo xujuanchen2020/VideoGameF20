@@ -3,10 +3,6 @@ public class Lookup {
     public static final double[] cos = genCos();
     public static final double[] sin = genSin();
 
-    public Lookup() {
-
-    }
-
     public static double[] genCos(){
         double[] cos = new double[360];
         for(int i = 0; i < 360; i++){

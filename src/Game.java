@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.image.BufferStrategy;
+import java.util.Random;
 
 public class Game extends GameApplet implements Runnable {
     private Thread thread;
@@ -16,8 +17,10 @@ public class Game extends GameApplet implements Runnable {
     Tank tank1 = new Tank(150,150, 90);
     Tank tank2 = new Tank(150, 350, 90);
 
-    Circle c1 = new Circle(100, 100, 50, 0);
-    Circle c2 = new Circle(200, 200, 50, 0);
+    Circle[] c = new Circle[50];
+    Line L = new Line(200, 0, 1000, 500);
+
+    Random rnd = new Random(System.currentTimeMillis());
 
     public Game(String title, int width, int height){
         this.title = title;
@@ -32,6 +35,10 @@ public class Game extends GameApplet implements Runnable {
         display.getjFrame().addMouseMotionListener(this);
         display.getCanvas().addMouseListener(this);
         display.getCanvas().addMouseMotionListener(this);
+
+        for(int i=0; i<c.length; i++){
+            c[i] = new Circle(rnd.nextInt(300)+50, rnd.nextInt(300)+50, 15, 0);
+        }
     }
 
     @Override
@@ -67,10 +74,14 @@ public class Game extends GameApplet implements Runnable {
 
     @Override
     public void tick() {
-        if(pressing[UP])  c1.goForward(6);
-        if(pressing[DN])  c1.goBackward(3);
-        if(pressing[LT])  c1.turnLeft(3);
-        if(pressing[RT])  c1.turnRight(3);
+        if(pressing[UP])  c[0].goForward(6);
+        if(pressing[DN])  c[0].goBackward(3);
+        if(pressing[LT])  c[0].turnLeft(3);
+        if(pressing[RT])  c[0].turnRight(3);
+
+        for(int i=1; i<c.length; i++){
+            c[i].goForward(rnd.nextInt(2));
+        }
     }
 
     @Override
@@ -83,22 +94,17 @@ public class Game extends GameApplet implements Runnable {
         Graphics g = bs.getDrawGraphics();
         g.clearRect(0,0, width, height);
 
-        if(r1.contains(mouseX, mouseY)) g.setColor(Color.RED);
-        else g.setColor(Color.BLACK);
-//        if(r1.overlaps(r2)) g.setColor(Color.RED);
-//        else g.setColor(Color.BLACK);
-        r1.draw(g);
-        r2.draw(g);
+        for(int i=0; i<c.length-1; i++){
+            for(int j=i+1; j<c.length; j++){
+                if(c[i].overlaps(c[j])) c[i].pushes(c[j]);
+            }
+        }
 
-//        if (tank1.overlaps(tank2)) g.setColor(Color.RED);
-//        else g.setColor(Color.BLACK);
-        tank1.draw(g);
-        tank2.draw(g);
-
-        if (c1.overlaps(c2)) g.setColor(Color.RED);
-        else g.setColor(Color.BLACK);
-        c1.draw(g);
-        c2.draw(g);
+        for(int i=0; i<c.length; i++){
+            if(c[i].overlaps(L)) c[i].isPushedBackBy(L);
+            c[i].draw(g);
+        }
+        L.draw(g);
 
         bs.show();
         g.dispose();

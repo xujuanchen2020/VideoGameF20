@@ -55,4 +55,31 @@ public class Circle {
         double d2 = dx*dx + dy*dy;
         return d2 < (r+c.r)*(r+c.r);
     }
+
+    public boolean overlaps(Line L){
+        double d = L.distanceTo(x, y);
+        return d < r;
+    }
+
+    public void isPushedBackBy(Line L){
+        double d = L.distanceTo(x, y);
+        double p = r - d;
+        x -= p * L.Nx;
+        y -= p * L.Ny;
+    }
+
+    public void pushes(Circle c){
+        double dx = x - c.x;
+        double dy = y - c.y;
+        double d = Math.sqrt(dx*dx + dy*dy);
+        double ux = dx / d;
+        double uy = dy / d;
+        double ri = r + c.r;
+        double p = ri - d;
+        x += ux * p/2;
+        y += uy * p/2;
+        c.x -= ux * p/2;
+        c.y -= uy * p/2;
+
+    }
 }
