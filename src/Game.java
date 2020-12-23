@@ -5,20 +5,15 @@ import java.util.Random;
 public class Game extends GameApplet implements Runnable {
     private Thread thread;
     private Display display;
-
     private final String title;
     private final int width, height;
-
     private boolean running = false;
 
-    Rect r1 = new Rect(10, 10, 200, 100);
-    Rect r2 = new Rect(100, 200, 100, 100);
+    Circle[] c = new Circle[10];
 
-    Tank tank1 = new Tank(150,150, 90);
-    Tank tank2 = new Tank(150, 350, 90);
-
-    Circle[] c = new Circle[50];
-    Line L = new Line(200, 0, 1000, 500);
+    Line L = new Line(1350, 600, 10, 600);
+    Line L2 = new Line(1300, 0, 1300, 800);
+    Line L3 = new Line(50, 800, 50, 0);
 
     Random rnd = new Random(System.currentTimeMillis());
 
@@ -36,8 +31,10 @@ public class Game extends GameApplet implements Runnable {
         display.getCanvas().addMouseListener(this);
         display.getCanvas().addMouseMotionListener(this);
 
+        double gravity = 0.7;
         for(int i=0; i<c.length; i++){
-            c[i] = new Circle(rnd.nextInt(300)+50, rnd.nextInt(300)+50, 15, 0);
+            c[i] = new Circle(rnd.nextInt(1000)+50, rnd.nextInt(500)+50, 15, 0);
+            c[i].setAcceleration(0, gravity);
         }
     }
 
@@ -74,13 +71,29 @@ public class Game extends GameApplet implements Runnable {
 
     @Override
     public void tick() {
-        if(pressing[UP])  c[0].goForward(6);
-        if(pressing[DN])  c[0].goBackward(3);
-        if(pressing[LT])  c[0].turnLeft(3);
-        if(pressing[RT])  c[0].turnRight(3);
-
         for(int i=1; i<c.length; i++){
-            c[i].goForward(rnd.nextInt(2));
+            if(pressing[UP])  c[0].goForward(6);
+            if(pressing[DN])  c[0].goBackward(3);
+            if(pressing[LT])  c[0].turnLeft(3);
+            if(pressing[RT])  c[0].turnRight(3);
+            c[i].move();
+        }
+
+        for(int i = 0; i < c.length; i++) {
+            if(c[i].overlaps(L)) {
+                c[i].isPushedBackBy(L);
+                c[i].vy = -0.9* c[i].vy;
+            }
+
+            if(c[i].overlaps(L2)) {
+                c[i].isPushedBackBy(L2);
+                c[i].vx = -0.5* c[i].vx;
+            }
+
+            if(c[i].overlaps(L3)) {
+                c[i].isPushedBackBy(L3);
+                c[i].vx = -0.5* c[i].vx;
+            }
         }
     }
 
@@ -94,17 +107,12 @@ public class Game extends GameApplet implements Runnable {
         Graphics g = bs.getDrawGraphics();
         g.clearRect(0,0, width, height);
 
-        for(int i=0; i<c.length-1; i++){
-            for(int j=i+1; j<c.length; j++){
-                if(c[i].overlaps(c[j])) c[i].pushes(c[j]);
-            }
-        }
-
         for(int i=0; i<c.length; i++){
-            if(c[i].overlaps(L)) c[i].isPushedBackBy(L);
             c[i].draw(g);
         }
         L.draw(g);
+        L2.draw(g);
+        L3.draw(g);
 
         bs.show();
         g.dispose();

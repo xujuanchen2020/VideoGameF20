@@ -1,12 +1,12 @@
 import java.awt.*;
 
 public class Circle {
-    double x, y, r, cosA, sinA;
+    double px, py, r, cosA, sinA, vx, vy, ax, ay;
     int A;
 
-    public Circle(double x, double y, double r, int A){
-        this.x = x;
-        this.y = y;
+    public Circle(double px, double py, double r, int A){
+        this.px = px;
+        this.py = py;
         this.r = r;
         this.A = A;
         cosA = Lookup.cos[A];
@@ -14,13 +14,39 @@ public class Circle {
     }
 
     public void draw(Graphics g){
-        g.drawOval((int)(x-r), (int)(y-r), (int)(2*r), (int)(2*r));
-        g.drawLine((int)x, (int)y, (int)(x+r*cosA), (int)(y+r*sinA));
+        g.drawOval((int)(px-r), (int)(py-r), (int)(2*r), (int)(2*r));
+        g.drawLine((int)px, (int)py, (int)(px+r*cosA), (int)(py+r*sinA));
+    }
+
+    public void move(){
+        vx += ax;
+        vy += ay;
+
+        px += vx;
+        py += vy;
+    }
+
+    public void setVelocity(double vx, double vy){
+        this.vx = vx;
+        this.vy = vy;
+    }
+
+    public void setAcceleration(double ax, double ay){
+        this.ax = ax;
+        this.ay = ay;
+    }
+
+    public void jump(double d){
+        setVelocity(0, -d);
+    }
+
+    public void toss(double vx, double vy){
+        setVelocity(vx, vy);
     }
 
     public void moveBy(double dx, double dy){
-        x += dx;
-        y += dy;
+        px += dx;
+        py += dy;
     }
 
     public void goForward(double d){
@@ -50,36 +76,35 @@ public class Circle {
     }
 
     public boolean overlaps(Circle c){
-        double dx = x - c.x;
-        double dy = y - c.y;
+        double dx = px - c.px;
+        double dy = py - c.py;
         double d2 = dx*dx + dy*dy;
         return d2 < (r+c.r)*(r+c.r);
     }
 
     public boolean overlaps(Line L){
-        double d = L.distanceTo(x, y);
+        double d = L.distanceTo(px, py);
         return d < r;
     }
 
     public void isPushedBackBy(Line L){
-        double d = L.distanceTo(x, y);
+        double d = L.distanceTo(px, py);
         double p = r - d;
-        x -= p * L.Nx;
-        y -= p * L.Ny;
+        px -= p * L.Nx;
+        py -= p * L.Ny;
     }
 
     public void pushes(Circle c){
-        double dx = x - c.x;
-        double dy = y - c.y;
+        double dx = px - c.px;
+        double dy = py - c.py;
         double d = Math.sqrt(dx*dx + dy*dy);
         double ux = dx / d;
         double uy = dy / d;
         double ri = r + c.r;
         double p = ri - d;
-        x += ux * p/2;
-        y += uy * p/2;
-        c.x -= ux * p/2;
-        c.y -= uy * p/2;
-
+        px += ux * p/2;
+        py += uy * p/2;
+        c.px -= ux * p/2;
+        c.py -= uy * p/2;
     }
 }
