@@ -3,7 +3,7 @@ import java.awt.event.*;
 public abstract class GameApplet implements KeyListener, MouseListener, MouseMotionListener {
     public boolean[] pressing = new boolean[1024];
 
-    public static int mouseX, mouseY;
+    public static int mouseX=0, mouseY=0;
     public static final int UP   = KeyEvent.VK_UP;
     public static final int DN   = KeyEvent.VK_DOWN;
     public static final int LT   = KeyEvent.VK_LEFT;

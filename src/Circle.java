@@ -1,8 +1,21 @@
 import java.awt.*;
 
 public class Circle {
-    double px, py, r, cosA, sinA, vx, vy, ax, ay;
-    int A;
+    double px;
+    double py;
+
+    double vx = 0;
+    double vy = 0;
+
+    double ax = 0;
+    double ay = 0;
+
+    double r;
+
+    int    A;
+
+    double cosA;
+    double sinA;
 
     public Circle(double px, double py, double r, int A){
         this.px = px;
@@ -14,15 +27,16 @@ public class Circle {
     }
 
     public void draw(Graphics g){
-        g.drawOval((int)(px-r), (int)(py-r), (int)(2*r), (int)(2*r));
-        g.drawLine((int)px, (int)py, (int)(px+r*cosA), (int)(py+r*sinA));
+        g.drawOval((int)(px-r), (int)(py-r), (int)(2.0*r), (int)(2.0*r));
+
+        g.drawLine((int)px, (int)py, (int)(px + r*cosA), (int)(py + r*sinA));
     }
 
     public void move(){
-        vx += ax;
+        vx += ax;           // Accelerate
         vy += ay;
 
-        px += vx;
+        px += vx;           // Move
         py += vy;
     }
 
@@ -79,7 +93,8 @@ public class Circle {
         double dx = px - c.px;
         double dy = py - c.py;
         double d2 = dx*dx + dy*dy;
-        return d2 < (r+c.r)*(r+c.r);
+        double ri = r + c.r;
+        return d2 <= ri*ri;
     }
 
     public boolean overlaps(Line L){
@@ -90,20 +105,26 @@ public class Circle {
     public void isPushedBackBy(Line L){
         double d = L.distanceTo(px, py);
         double p = r - d;
-        px -= p * L.Nx;
-        py -= p * L.Ny;
+        px += p * L.Nx;
+        py += p * L.Ny;
     }
 
     public void pushes(Circle c){
-        double dx = px - c.px;
-        double dy = py - c.py;
+        double dx = px - c.px;      // <dx, dy>  // vector in the direction from center of one circle to the other
+        double dy = py - c.py;                 // with a magnitude equal to the distance between the two circles
+
         double d = Math.sqrt(dx*dx + dy*dy);
-        double ux = dx / d;
+
+        double ux = dx / d;      //<dx/d, dy/d>// unit vector in the direction from center of one circle to the other
         double uy = dy / d;
+
         double ri = r + c.r;
+
         double p = ri - d;
+
         px += ux * p/2;
         py += uy * p/2;
+
         c.px -= ux * p/2;
         c.py -= uy * p/2;
     }

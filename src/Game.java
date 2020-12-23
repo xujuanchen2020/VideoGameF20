@@ -1,4 +1,5 @@
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
 import java.util.Random;
 
@@ -11,9 +12,7 @@ public class Game extends GameApplet implements Runnable {
 
     Circle[] c = new Circle[10];
 
-    Line L = new Line(1350, 600, 10, 600);
-    Line L2 = new Line(1300, 0, 1300, 800);
-    Line L3 = new Line(50, 800, 50, 0);
+    Line[] L = new Line[3];
 
     Random rnd = new Random(System.currentTimeMillis());
 
@@ -33,8 +32,18 @@ public class Game extends GameApplet implements Runnable {
 
         double gravity = 0.7;
         for(int i=0; i<c.length; i++){
-            c[i] = new Circle(rnd.nextInt(1000)+50, rnd.nextInt(500)+50, 15, 0);
+            c[i] = new Circle(rnd.nextInt(900)+50, rnd.nextInt(500)+50, 15, 0);
             c[i].setAcceleration(0, gravity);
+        }
+
+        double[][] v = {
+                {1000, 580,    0, 580},
+                { 850,   0,  850, 580},
+                {  50, 580,   50,   0},
+        };
+
+        for(int i=0; i<v.length; i++){
+            L[i] = new Line(v[i][0], v[i][1], v[i][2], v[i][3]);
         }
     }
 
@@ -71,27 +80,35 @@ public class Game extends GameApplet implements Runnable {
 
     @Override
     public void tick() {
-        for(int i=1; i<c.length; i++){
-            if(pressing[UP])  c[0].goForward(6);
-            if(pressing[DN])  c[0].goBackward(3);
-            if(pressing[LT])  c[0].turnLeft(3);
-            if(pressing[RT])  c[0].turnRight(3);
+        for(int i=0; i<c.length; i++){
+            if(pressing[UP])  c[i].jump(4);
+            if(pressing[DN])  c[i].goBackward(3);
+            if(pressing[LT])  c[i].turnLeft(3);
+            if(pressing[RT])  c[i].toss(10, -20);
             c[i].move();
         }
 
+        for(int i = 0; i < c.length-1; i++) {
+            for(int j = i + 1; j < c.length; j++ ) {
+                if(c[i].overlaps(c[j])) {
+                    c[i].pushes(c[j]);
+                }
+            }
+        }
+
         for(int i = 0; i < c.length; i++) {
-            if(c[i].overlaps(L)) {
-                c[i].isPushedBackBy(L);
-                c[i].vy = -0.9* c[i].vy;
+            if(c[i].overlaps(L[0])) {
+                c[i].isPushedBackBy(L[0]);
+                c[i].vy = -0.75 * c[i].vy;  // Bounce off floor
             }
 
-            if(c[i].overlaps(L2)) {
-                c[i].isPushedBackBy(L2);
+            if(c[i].overlaps(L[1])) {
+                c[i].isPushedBackBy(L[1]);
                 c[i].vx = -0.5* c[i].vx;
             }
 
-            if(c[i].overlaps(L3)) {
-                c[i].isPushedBackBy(L3);
+            if(c[i].overlaps(L[2])) {
+                c[i].isPushedBackBy(L[2]);
                 c[i].vx = -0.5* c[i].vx;
             }
         }
@@ -110,9 +127,10 @@ public class Game extends GameApplet implements Runnable {
         for(int i=0; i<c.length; i++){
             c[i].draw(g);
         }
-        L.draw(g);
-        L2.draw(g);
-        L3.draw(g);
+
+        for(int i=0; i<L.length; i++){
+            L[i].draw(g);
+        }
 
         bs.show();
         g.dispose();
@@ -135,5 +153,31 @@ public class Game extends GameApplet implements Runnable {
         }catch (InterruptedException e){
             e.printStackTrace();
         }
+    }
+
+    public void mousePressed(MouseEvent e){
+        mouseX = e.getX();
+        mouseY = e.getY();
+        for(int i=0; i<L.length; i++){
+            L[i].grabbedAt(mouseX, mouseY);
+        }
+    }
+
+    public void mouseDragged(MouseEvent e){
+        int nx = e.getX();
+        int ny = e.getY();
+        int dx = nx - mouseX;
+        int dy = ny - mouseY;
+
+        mouseX = nx;
+        mouseY = ny;
+
+        for(int i=0; i<L.length; i++){
+            L[i].draggedBy(dx, dy);
+        }
+    }
+
+    public void mouseReleased(MouseEvent e){
+
     }
 }
