@@ -17,6 +17,8 @@ public class Circle {
     double cosA;
     double sinA;
 
+    boolean held = false;
+
     public Circle(double px, double py, double r, int A){
         this.px = px;
         this.py = py;
@@ -89,14 +91,6 @@ public class Circle {
         sinA = Lookup.sin[A];
     }
 
-    public boolean overlaps(Circle c){
-        double dx = px - c.px;
-        double dy = py - c.py;
-        double d2 = dx*dx + dy*dy;
-        double ri = r + c.r;
-        return d2 <= ri*ri;
-    }
-
     public boolean overlaps(Line L){
         double d = L.distanceTo(px, py);
         return d < r;
@@ -109,6 +103,14 @@ public class Circle {
         py += p * L.Ny;
     }
 
+    public boolean overlaps(Circle c){
+        double dx = px - c.px;
+        double dy = py - c.py;
+        double d2 = dx*dx + dy*dy;
+        double ri = r + c.r;
+        return d2 <= ri*ri;
+    }
+
     public void pushes(Circle c){
         double dx = px - c.px;      // <dx, dy>  // vector in the direction from center of one circle to the other
         double dy = py - c.py;                 // with a magnitude equal to the distance between the two circles
@@ -119,7 +121,6 @@ public class Circle {
         double uy = dy / d;
 
         double ri = r + c.r;
-
         double p = ri - d;
 
         px += ux * p/2;
@@ -127,5 +128,57 @@ public class Circle {
 
         c.px -= ux * p/2;
         c.py -= uy * p/2;
+    }
+
+    public void bounceOff(Circle c){
+        double dx = c.px - px;
+        double dy = c.py - py;
+
+        double mag = Math.sqrt(dx*dx + dy*dy);
+
+        double ux = dx / mag;
+        double uy = dy / mag;
+
+        double tx = -uy;
+        double ty = ux;
+
+        double u = vx*ux + vy*uy;
+        double t = vx*tx + vy*ty;
+
+        double cu = c.vx*ux + c.vy*uy;
+        double ct = c.vx*tx + c.vy*ty;
+
+        vx = 0.9*(t * tx + cu * ux);
+        vy = 0.9*(t * ty + cu * uy);
+
+        c.vx = 0.9*(ct * tx + u * ux);
+        c.vy = 0.9*(ct * ty + u * uy);
+    }
+
+    public void bounceOff(Line L){
+        double d = L.distanceTo(px, py);
+        double p = r - d;
+        px += 1.9*(p * L.Nx);
+        py += 1.9*(p * L.Ny);
+
+        double mag = 1.9 * (vx * L.Nx + vy *L.Ny);
+        double tx = mag * L.Nx;
+        double ty = mag * L.Ny;
+
+        vx -= tx;
+        vy -= ty;
+    }
+
+    public void grabbedAt(int x, int y){
+        double dx = px - x;
+        double dy = py - y;
+
+        double d2 = dx*dx + dy*dy;
+        double r2 = r * r;
+        held = d2 < r2;
+    }
+
+    public void released(){
+        held = false;
     }
 }

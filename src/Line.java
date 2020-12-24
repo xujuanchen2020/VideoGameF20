@@ -56,6 +56,8 @@ public class Line {
             x2 += dx;
             y2 += dy;
         }
+
+        computeNormal();
     }
 
     public void released(){

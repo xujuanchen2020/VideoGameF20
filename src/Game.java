@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
+import java.util.Objects;
 import java.util.Random;
 
 public class Game extends GameApplet implements Runnable {
@@ -10,7 +11,7 @@ public class Game extends GameApplet implements Runnable {
     private final int width, height;
     private boolean running = false;
 
-    Circle[] c = new Circle[10];
+    Circle[] c = new Circle[5];
 
     Line[] L = new Line[3];
 
@@ -37,7 +38,7 @@ public class Game extends GameApplet implements Runnable {
         }
 
         double[][] v = {
-                {1000, 580,    0, 580},
+                {1200, 580,    0, 580},
                 { 850,   0,  850, 580},
                 {  50, 580,   50,   0},
         };
@@ -92,6 +93,7 @@ public class Game extends GameApplet implements Runnable {
             for(int j = i + 1; j < c.length; j++ ) {
                 if(c[i].overlaps(c[j])) {
                     c[i].pushes(c[j]);
+                    c[i].bounceOff(c[j]);
                 }
             }
         }
@@ -99,17 +101,19 @@ public class Game extends GameApplet implements Runnable {
         for(int i = 0; i < c.length; i++) {
             if(c[i].overlaps(L[0])) {
                 c[i].isPushedBackBy(L[0]);
-                c[i].vy = -0.75 * c[i].vy;  // Bounce off floor
+                if(Math.abs(c[i].vx)<0.01) c[i].vx = 0;
+                c[i].vx = 0.99 * c[i].vx;
+                c[i].bounceOff(L[0]);
             }
 
             if(c[i].overlaps(L[1])) {
                 c[i].isPushedBackBy(L[1]);
-                c[i].vx = -0.5* c[i].vx;
+                c[i].bounceOff(L[1]);
             }
 
             if(c[i].overlaps(L[2])) {
                 c[i].isPushedBackBy(L[2]);
-                c[i].vx = -0.5* c[i].vx;
+                c[i].bounceOff(L[2]);
             }
         }
     }
@@ -158,8 +162,13 @@ public class Game extends GameApplet implements Runnable {
     public void mousePressed(MouseEvent e){
         mouseX = e.getX();
         mouseY = e.getY();
+
         for(int i=0; i<L.length; i++){
             L[i].grabbedAt(mouseX, mouseY);
+        }
+
+        for(int i=0; i<c.length; i++){
+            c[i].grabbedAt(mouseX, mouseY);
         }
     }
 
@@ -175,9 +184,22 @@ public class Game extends GameApplet implements Runnable {
         for(int i=0; i<L.length; i++){
             L[i].draggedBy(dx, dy);
         }
+
+        for(int i=0; i<c.length; i++){
+            if(c[i].held){
+                c[i].moveBy(dx, dy);
+                c[i].ay = 0;
+            }
+        }
     }
 
     public void mouseReleased(MouseEvent e){
-
+        for(int i=0; i<L.length; i++){
+            L[i].released();
+        }
+        for(int i=0; i<c.length; i++){
+            c[i].released();
+            c[i].ay = 0.7;
+        }
     }
 }
