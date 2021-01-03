@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
-import java.util.Objects;
 import java.util.Random;
 
 public class Game extends GameApplet implements Runnable {
@@ -11,10 +10,9 @@ public class Game extends GameApplet implements Runnable {
     private final int width, height;
     private boolean running = false;
 
+    BattleLord battlelord = new BattleLord(100,100,BattleLord.DOWN);
     Circle[] c = new Circle[5];
-
     Line[] L = new Line[3];
-
     Random rnd = new Random(System.currentTimeMillis());
 
     public Game(String title, int width, int height){
@@ -38,9 +36,9 @@ public class Game extends GameApplet implements Runnable {
         }
 
         double[][] v = {
-                {1200, 580,    0, 580},
-                { 850,   0,  850, 580},
-                {  50, 580,   50,   0},
+                {1200, 680,    0, 680},
+                { 1100,  0, 1100, 680},
+                {  50, 680,   50,   0},
         };
 
         for(int i=0; i<v.length; i++){
@@ -116,6 +114,12 @@ public class Game extends GameApplet implements Runnable {
                 c[i].bounceOff(L[2]);
             }
         }
+
+        if(pressing[UP])  battlelord.moveUp(7);
+        if(pressing[DN])  battlelord.moveDown(7);
+        if(pressing[LT])  battlelord.moveLeft(7);
+        if(pressing[RT])  battlelord.moveRight(7);
+
     }
 
     @Override
@@ -135,6 +139,8 @@ public class Game extends GameApplet implements Runnable {
         for(int i=0; i<L.length; i++){
             L[i].draw(g);
         }
+
+        battlelord.draw(g);
 
         bs.show();
         g.dispose();
