@@ -1,11 +1,9 @@
 import java.awt.*;
 
-public class Tank {
-    private int x, y, A;
-    double[] cos = Lookup.genCos();
-    double[] sin = Lookup.genSin();
+public class Tank extends PolygonModel2D{
+    Rect AABB;
 
-    public static int[][] x_structure = {
+    public static int[][] tank_x_structure = {
             {-40, -40,  40,  40},
             {-10, -10,  10,  10},
             { 35,  35,  10,  10},
@@ -16,7 +14,9 @@ public class Tank {
             {-4, -20, -30, -5},
             {-4, -20, -30, -5},
     };
-    public static int[][] y_structure = {
+
+
+    public static int[][] tank_y_structure = {
             {-25,  25,  25, -25},
             {-10,  10,  10, -10},
             { -3,   3,   3,  -3},
@@ -28,43 +28,22 @@ public class Tank {
             {-3, -3, -70, -50},
     };
 
-    public Tank(int x, int y, int A){
-        this.x = x;
-        this.y = y;
-        this.A = A;
+    public Tank(int x, int y, int A) {
+        super(x, y, A, tank_x_structure, tank_y_structure);
+        AABB = new Rect(x-40, y-40, 80, 80);
     }
 
-    public void moveBy(int dx, int dy){
-        x += dx;
-        y += dy;
+    public void moveBy(int dx, int dy) {
+        super.moveBy(dx, dy);
+        AABB.moveBy(dx, dy);
     }
 
-    public void moveForwardBy(int d){
-        int dx = (int) (d*cos[A]);
-        int dy = (int) (d*sin[A]);
-        moveBy(dx, dy);
+    public boolean overlaps(Tank tank) {
+        return AABB.overlaps(tank.AABB);
     }
 
-    public void rotateBy(int dA){
-        A += dA;
-        if(A > 359) A -= 360;
-        if(A < 0) A += 360;
-    }
-
-    public void draw(Graphics g){
-        int _x;
-        int _y;
-        int[] x_points = new int[4];
-        int[] y_points = new int[4];
-
-        for(int polygon=0; polygon<x_structure.length; polygon++) {
-            for (int vertex = 0; vertex < x_structure[polygon].length; vertex++) {
-                _x = x_structure[polygon][vertex];
-                _y = y_structure[polygon][vertex];
-                x_points[vertex] = (int) (_x * cos[A] - _y * sin[A] + x);
-                y_points[vertex] = (int) (_y * cos[A] + _x * sin[A] + y);
-            }
-            g.drawPolygon(x_points,y_points,x_structure[polygon].length);
-        }
+    public void draw(Graphics g) {
+        super.draw(g);
+        AABB.draw(g);
     }
 }

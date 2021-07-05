@@ -1,5 +1,3 @@
-import org.omg.CORBA.PUBLIC_MEMBER;
-
 import java.awt.*;
 
 public class Rect {
@@ -12,8 +10,14 @@ public class Rect {
         this.h = h;
     }
 
-    public boolean contains(int mx, int my)
-    {
+    public boolean overlaps(Rect r){
+        return (r.x + r.w >= x) &&
+                (x + w >= r.x) &&
+                (r.y + r.h >= y) &&
+                (y + h >= r.y);
+    }
+
+    public boolean contains(int mx, int my) {
         return  (mx >= x  ) &&
                 (mx <= x+w) &&
                 (my >= y  ) &&

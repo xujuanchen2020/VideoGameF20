@@ -1,20 +1,19 @@
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferStrategy;
+import java.util.Random;
 
-public class Game implements Runnable {
+public class Game extends GameApplet implements Runnable {
     private Thread thread;
     private Display display;
-
     private final String title;
     private final int width, height;
-
     private boolean running = false;
 
-    Rect r1 = new Rect(10, 10, 200, 100);
-    Rect r2 = new Rect(100, 200, 100, 100);
-
-    Tank tank1 = new Tank(150,150, 90);
-    Tank tank2 = new Tank(150, 350, 90);
+    BattleLord battlelord = new BattleLord(100,100,BattleLord.DOWN);
+    Circle[] c = new Circle[5];
+    Line[] L = new Line[3];
+    Random rnd = new Random(System.currentTimeMillis());
 
     public Game(String title, int width, int height){
         this.title = title;
@@ -24,15 +23,27 @@ public class Game implements Runnable {
 
     public void init(){
         display = new Display(title, width, height);
-        MouseManager mouseManager = new MouseManager();
-        KeyManager keyManager = new KeyManager();
+        display.getjFrame().addKeyListener(this);
+        display.getjFrame().addMouseListener(this);
+        display.getjFrame().addMouseMotionListener(this);
+        display.getCanvas().addMouseListener(this);
+        display.getCanvas().addMouseMotionListener(this);
 
-        display.getjFrame().addKeyListener(keyManager);
-        display.getjFrame().addMouseListener(mouseManager);
-        display.getjFrame().addMouseMotionListener(mouseManager);
-        display.getCanvas().addMouseListener(mouseManager);
-        display.getCanvas().addMouseMotionListener(mouseManager);
+        double gravity = 0.7;
+        for(int i=0; i<c.length; i++){
+            c[i] = new Circle(rnd.nextInt(900)+50, rnd.nextInt(500)+50, 15, 0);
+            c[i].setAcceleration(0, gravity);
+        }
 
+        double[][] v = {
+                {1200, 680,    0, 680},
+                { 1100,  0, 1100, 680},
+                {  50, 680,   50,   0},
+        };
+
+        for(int i=0; i<v.length; i++){
+            L[i] = new Line(v[i][0], v[i][1], v[i][2], v[i][3]);
+        }
     }
 
     @Override
@@ -66,16 +77,53 @@ public class Game implements Runnable {
         stop();
     }
 
-    private void tick() {
-        if (KeyManager.up_pressed) tank1.moveForwardBy(10);
-        if (KeyManager.dn_pressed) tank1.moveBy(0, 5);
-        if (KeyManager.lt_pressed) tank1.rotateBy(-5);
-        if (KeyManager.rt_pressed) tank1.rotateBy(5);
-        tank2.moveBy(5,0);
-        tank2.rotateBy(5);
+    @Override
+    public void tick() {
+        for(int i=0; i<c.length; i++){
+            if(pressing[UP])  c[i].jump(4);
+            if(pressing[DN])  c[i].goBackward(3);
+            if(pressing[LT])  c[i].turnLeft(3);
+            if(pressing[RT])  c[i].toss(10, -20);
+            c[i].move();
+        }
+
+        for(int i = 0; i < c.length-1; i++) {
+            for(int j = i + 1; j < c.length; j++ ) {
+                if(c[i].overlaps(c[j])) {
+                    c[i].pushes(c[j]);
+                    c[i].bounceOff(c[j]);
+                }
+            }
+        }
+
+        for(int i = 0; i < c.length; i++) {
+            if(c[i].overlaps(L[0])) {
+                c[i].isPushedBackBy(L[0]);
+                if(Math.abs(c[i].vx)<0.01) c[i].vx = 0;
+                c[i].vx = 0.99 * c[i].vx;
+                c[i].bounceOff(L[0]);
+            }
+
+            if(c[i].overlaps(L[1])) {
+                c[i].isPushedBackBy(L[1]);
+                c[i].bounceOff(L[1]);
+            }
+
+            if(c[i].overlaps(L[2])) {
+                c[i].isPushedBackBy(L[2]);
+                c[i].bounceOff(L[2]);
+            }
+        }
+
+        if(pressing[UP])  battlelord.moveUp(7);
+        if(pressing[DN])  battlelord.moveDown(7);
+        if(pressing[LT])  battlelord.moveLeft(7);
+        if(pressing[RT])  battlelord.moveRight(7);
+
     }
 
-    private void render() {
+    @Override
+    public void render() {
         BufferStrategy bs = display.getCanvas().getBufferStrategy();
         if (bs == null){
             display.getCanvas().createBufferStrategy(3);
@@ -84,15 +132,15 @@ public class Game implements Runnable {
         Graphics g = bs.getDrawGraphics();
         g.clearRect(0,0, width, height);
 
-        if(r1.contains(MouseManager.mouseX, MouseManager.mouseY)) g.setColor(Color.RED);
-        else g.setColor(Color.BLACK);
-        r1.draw(g);
+        for(int i=0; i<c.length; i++){
+            c[i].draw(g);
+        }
 
-        g.setColor(Color.BLACK);
-        r2.draw(g);
+        for(int i=0; i<L.length; i++){
+            L[i].draw(g);
+        }
 
-        tank1.draw(g);
-        tank2.draw(g);
+        battlelord.draw(g);
 
         bs.show();
         g.dispose();
@@ -114,6 +162,50 @@ public class Game implements Runnable {
             thread.join();
         }catch (InterruptedException e){
             e.printStackTrace();
+        }
+    }
+
+    public void mousePressed(MouseEvent e){
+        mouseX = e.getX();
+        mouseY = e.getY();
+
+        for(int i=0; i<L.length; i++){
+            L[i].grabbedAt(mouseX, mouseY);
+        }
+
+        for(int i=0; i<c.length; i++){
+            c[i].grabbedAt(mouseX, mouseY);
+        }
+    }
+
+    public void mouseDragged(MouseEvent e){
+        int nx = e.getX();
+        int ny = e.getY();
+        int dx = nx - mouseX;
+        int dy = ny - mouseY;
+
+        mouseX = nx;
+        mouseY = ny;
+
+        for(int i=0; i<L.length; i++){
+            L[i].draggedBy(dx, dy);
+        }
+
+        for(int i=0; i<c.length; i++){
+            if(c[i].held){
+                c[i].moveBy(dx, dy);
+                c[i].ay = 0;
+            }
+        }
+    }
+
+    public void mouseReleased(MouseEvent e){
+        for(int i=0; i<L.length; i++){
+            L[i].released();
+        }
+        for(int i=0; i<c.length; i++){
+            c[i].released();
+            c[i].ay = 0.7;
         }
     }
 }
